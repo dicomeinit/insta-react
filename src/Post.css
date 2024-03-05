@@ -26,3 +26,23 @@
 .post_comments {
   padding: 20px;
 }
+
+.post_header {
+  display: flex;
+  align-items: center;
+  padding: 10px;
+  justify-content: space-between;
+  margin-left: 10px;
+}
+
+.post_headerInfo {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: space-between;
+  margin-left: 10px;
+}
+
+.post_headerInfo h3 {
+  margin-right: 10px; /* Add spacing between username and delete button */
+}

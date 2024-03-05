@@ -6,35 +6,36 @@ const BASE_URL = 'http://127.0.0.1:8001/'
 
 function App() {
 
-  const [posts, setPosts] = useState([]);
+    const [posts, setPosts] = useState([]);
 
-  useEffect(() => {
-    fetch(BASE_URL + 'post/all')
-        .then(response =>{
-          const json = response.json()
-          console.log(json);
-          if (response.ok) {
-              return json
-          }
-          throw response
-        })
-        .then(data => {
-            setPosts(data)
-        })
-        .catch(error => {
-            console.log(error);
-            alert(error)
-        })
-  }, [])
-  return (
-    <div className="app_posts">
-        {
-            posts.map(post => (
-                <Post key={post.id} post={post} />
-            ))
-        }
-    </div>
-  );
+    useEffect(() => {
+        fetch(BASE_URL + 'post/all')
+            .then(response => {
+                const json = response.json()
+                console.log(json);
+                if (response.ok) {
+                    return json
+                }
+                throw response
+            })
+            .then(data => {
+                setPosts(data)
+            })
+            .catch(error => {
+                console.log(error);
+                alert(error)
+            })
+    }, [])
+    return (
+        <div className="app_posts">
+            {
+                posts.map(post => (
+                    <Post key={post.id} post={post}/>
+                ))
+            }
+        </div>
+)
+    ;
 }
 
 export default App;
