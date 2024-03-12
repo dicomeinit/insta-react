@@ -30,9 +30,7 @@
 .post_header {
   display: flex;
   align-items: center;
-  padding: 10px;
-  justify-content: space-between;
-  margin-left: 10px;
+  padding: 20px;
 }
 
 .post_headerInfo {
@@ -43,6 +41,22 @@
   margin-left: 10px;
 }
 
-.post_headerInfo h3 {
-  margin-right: 10px; /* Add spacing between username and delete button */
+.post_commentbox {
+  display: flex;
+  margin-top: 10px;
+}
+
+.post_input {
+  flex: 1;
+  border: none;
+  border-top: 1px solid lightgray;
+  padding: 10px;
+}
+
+.post_button {
+  flex: 0;
+  border: none;
+  border-top: 1px solid lightgray;
+  background-color: transparent;
+  color: lightblue;
 }

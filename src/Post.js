@@ -4,10 +4,11 @@ import {Avatar, Button} from 'antd';
 
 const BASE_URL = 'http://127.0.0.1:8001/'
 
-function Post({post}) {
+function Post({post, authToken, authTokenType, username}) {
 
     const [imageUrl, setImageUrl] = useState('')
     const [comments, setComments] = useState([])
+    const [newComment, setNewComment] = useState('')
 
 
     useEffect(() => {
@@ -22,6 +23,78 @@ function Post({post}) {
         setComments(post.comments)
     }, [])
 
+    const handleDelete = (event) => {
+        event.preventDefault();
+
+        const requestOptions = {
+            method: 'GET',
+            headers: new Headers({
+                'Authorization': authTokenType + ' ' + authToken
+            })
+        }
+
+        fetch(BASE_URL + 'post/delete/' + post.id, requestOptions)
+            .then(response => {
+                if (response.ok) {
+                    window.location.reload()
+                }
+                throw response
+            })
+            .catch(error => {
+                console.log(error);
+            })
+    }
+
+    const postComment = (event) => {
+        event.preventDefault()
+
+        const json_string = JSON.stringify({
+          'username': username,
+          'text': newComment,
+          'post_id': post.id
+        })
+
+        const requestOptions = {
+          method: 'POST',
+          headers: new Headers({
+            'Authorization': authTokenType + ' ' + authToken,
+            'Content-Type': 'application/json'
+          }),
+          body: json_string
+        }
+
+        fetch(BASE_URL + 'comment', requestOptions)
+          .then(response => {
+            if (response.ok) {
+              return response.json()
+            }
+          })
+          .then(data => {
+            fetchComments()
+          })
+          .catch(error => {
+            console.log(error);
+          })
+          .finally(() => {
+            setNewComment('')
+          })
+      }
+
+      const fetchComments = () => {
+        fetch(BASE_URL + 'comment/all/' + post.id)
+          .then(response => {
+            if (response.ok) {
+              return response.json()
+            }
+            throw response
+          })
+          .then(data => {
+            setComments(data)
+          })
+          .catch(error => {
+            console.log(error);
+          })
+      }
 
     return (
         <div className="post">
@@ -29,10 +102,12 @@ function Post({post}) {
                 <Avatar
                     alt="Catalin"
                     src="https://secure.gravatar.com/avatar/7381b9e7e146bf03b5ef62ce417b53a2.jpg?s=192&d=https%3A%2F%2Fa.slack-edge.com%2Fdf10d%2Fimg%2Favatars%2Fava_0024-192.png"/>
-            {/*</div>*/}
-            {/*<div className="post_headerInfo">*/}
+                {/*</div>*/}
+                {/*<div className="post_headerInfo">*/}
                 <h3 className="post_headerInfo">{post.user.username}</h3>
-                <Button className="post_delete">Delete</Button>
+                <Button className="post_delete" onClick={handleDelete}>
+                    Delete
+                </Button>
             </div>
             <img
                 className='post_image'
@@ -43,15 +118,33 @@ function Post({post}) {
 
             <div className='post_comments'>
                 {
-                  comments.map((comment) => (
-                    <p>
-                      <strong>{comment.username}:</strong> {comment.text}
-                    </p>
-                  ))
+                    comments.map((comment) => (
+                        <p>
+                            <strong>{comment.username}:</strong> {comment.text}
+                        </p>
+                    ))
                 }
             </div>
+
+            {authToken && (
+                <form className="post_commentbox">
+                    <input className="post_input"
+                           type="text"
+                           placeholder="Add a comment"
+                           value={newComment}
+                           onChange={(e) => setNewComment(e.target.value)}
+                    />
+                    <button
+                        className="post_button"
+                        type="submit"
+                        disabled={!newComment}
+                        onClick={postComment}>
+                        Post
+                    </button>
+                </form>
+            )}
         </div>
-    )
+)
 }
 
 export default Post;
