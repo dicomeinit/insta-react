@@ -1,6 +1,9 @@
 import React, {useState, useEffect} from "react";
 import './Post.css';
 import {Avatar, Button} from 'antd';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 
 const BASE_URL = 'http://127.0.0.1:8001/'
 
@@ -9,6 +12,8 @@ function Post({post, authToken, authTokenType, username}) {
     const [imageUrl, setImageUrl] = useState('')
     const [comments, setComments] = useState([])
     const [newComment, setNewComment] = useState('')
+    const [liked, setLiked] = useState(false);
+    const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
 
 
     useEffect(() => {
@@ -96,6 +101,34 @@ function Post({post, authToken, authTokenType, username}) {
           })
       }
 
+    useEffect(() => {
+        setLiked(post.likes?.some(like => like.username === username) || false);
+    }, [post.likes, username]);
+
+    const handleLike = () => {
+        const requestOptions = {
+            method: 'POST',
+            headers: new Headers({
+                'Authorization': authTokenType + ' ' + authToken,
+                'Content-Type': 'application/json'
+            })
+        };
+
+        const url = BASE_URL + 'like/' + (liked ? 'unlike/' : 'like/') + '' + post.id;
+
+        fetch(url, requestOptions)
+            .then(response => {
+                if (response.ok) {
+                    setLiked(!liked);
+                    setLikesCount(likesCount + (liked ? -1 : 1));
+                }
+            })
+            .catch(error => {
+                console.log(error);
+            });
+    };
+
+
     return (
         <div className="post">
             <div className="post_header">
@@ -124,6 +157,16 @@ function Post({post, authToken, authTokenType, username}) {
                         </p>
                     ))
                 }
+            </div>
+
+            <div className="post_like">
+              <button onClick={handleLike} style={{ border: 'none', background: 'transparent' }}>
+                {liked ? (
+                  <FontAwesomeIcon icon={faHeartSolid} style={{ color: 'red' }} />
+                ) : (
+                  <FontAwesomeIcon icon={faHeartRegular} />
+                )} ({likesCount})
+              </button>
             </div>
 
             {authToken && (
