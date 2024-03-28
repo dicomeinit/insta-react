@@ -1,8 +1,8 @@
 import React, {useState, useEffect} from "react";
 import './Post.css';
-import {Avatar, Button} from 'antd';
+import {Avatar, Button, Input, Modal} from 'antd';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faHeart as faHeartSolid } from '@fortawesome/free-solid-svg-icons';
+import { faHeart as faHeartSolid, faEdit} from '@fortawesome/free-solid-svg-icons';
 import { faHeart as faHeartRegular } from '@fortawesome/free-regular-svg-icons';
 
 const BASE_URL = 'http://127.0.0.1:8001/'
@@ -14,6 +14,8 @@ function Post({post, authToken, authTokenType, username}) {
     const [newComment, setNewComment] = useState('')
     const [liked, setLiked] = useState(false);
     const [likesCount, setLikesCount] = useState(post.likes?.length || 0);
+    const [isEditing, setIsEditing] = useState(false);
+    const [editCaption, setEditCaption] = useState(post.caption || '');
 
 
     useEffect(() => {
@@ -129,6 +131,36 @@ function Post({post, authToken, authTokenType, username}) {
     };
 
 
+    const handleEdit = async () => {
+        const requestOptions = {
+            method: 'PUT',
+            headers: new Headers({
+                'Authorization': authTokenType + ' ' + authToken,
+                'Content-Type': 'application/json',
+            }),
+            body: JSON.stringify({
+                caption: editCaption,
+            }),
+        };
+        const url = `${BASE_URL}post/edit/${post.id}`;
+
+        try {
+            const response = await fetch(url, requestOptions);
+            if (response.ok) {
+                const updatedPost = await response.json();
+                // Update the post state with the new caption
+                post.caption = updatedPost.caption;
+                setIsEditing(false);
+            } else {
+                const errorData = await response.json();
+                console.error('Failed to update the post:', errorData);
+            }
+        } catch (error) {
+            console.error('Failed to update the post:', error);
+        }
+    };
+
+
     return (
         <div className="post">
             <div className="post_header">
@@ -141,6 +173,11 @@ function Post({post, authToken, authTokenType, username}) {
                 <Button className="post_delete" onClick={handleDelete}>
                     Delete
                 </Button>
+                {username === post.user.username && (
+                    <Button icon={<FontAwesomeIcon icon={faEdit} />} onClick={() => setIsEditing(true)}>
+                        Edit
+                    </Button>
+                )}
             </div>
             <img
                 className='post_image'
@@ -186,6 +223,10 @@ function Post({post, authToken, authTokenType, username}) {
                     </button>
                 </form>
             )}
+
+            <Modal title="Edit Post" visible={isEditing} onOk={handleEdit} onCancel={() => setIsEditing(false)}>
+                <Input value={editCaption} onChange={e => setEditCaption(e.target.value)} />
+            </Modal>
         </div>
 )
 }
